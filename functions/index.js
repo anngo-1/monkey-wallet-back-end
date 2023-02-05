@@ -4,7 +4,7 @@ admin.initializeApp();
 
 const functions = require("firebase-functions");
 var Web3 = require('web3');
-var provider = 'HTTP://100.64.52.166:7545';
+var provider = 'HTTP://169.233.141.58:7545';
 var web3Provider = new Web3.providers.HttpProvider(provider);
 var web3 = new Web3(web3Provider)
 const Accounts = require('web3-eth-accounts')
@@ -47,7 +47,7 @@ exports.createAccount= functions.https.onRequest(async(req, res)=>{
     res.status(204).send('');
   } else {
 
-    
+
     const email = req.query.email;
 
     var usersRef = admin.firestore().collection('accountdata').doc(email)
@@ -150,51 +150,74 @@ exports.createAccount= functions.https.onRequest(async(req, res)=>{
       
       });
 
-      
-exports.walletData= functions.https.onRequest(async(req, res)=>{
+      exports.payment= functions.https.onRequest(async(req, res)=>{
  
-    // const email = req.query.email;
-
-    //   const publicKey = data.publicKey
-        
-      // const promise1 = Promise.resolve(web3.eth.getBalance("0x3CEC6907064e716944a833e4e66B464480829e61"))
+        res.set('Access-Control-Allow-Origin', '*');
       
-      // promise1.then((value) => {
-      //   console.log(value)
-      //   res.send(value)
-      // })
-
-   
-    //   function getBalance (address) {
-    //     return new Promise (function (resolve, reject) {
-    //       web3.eth.getBalance(address, function (error, result) {
-    //         if (error) {
-    //           reject(error);
-    //         } else {
-    //           res.send(resolve(result));
-    //           }
-    //       })
-    //     })
-    //   }
-  
-    //  getBalance("0x3CEC6907064e716944a833e4e66B464480829e61").then((result) => {
-    //        console.log('getBalance',result);
-    //        res.send(result)
-    //   });
-   
-    const promise1 = Promise.resolve(123);
-
-promise1.then((value) => {
-  res.send(value);
-  // Expected output: 123
-});
-
-
-      // var balance1 = await web3.eth.getBalance(String(publicKey));
-      // const etherValue = await Web3.utils.fromWei(String(balance1), 'ether')
-      // res.send({trueValue:etherValue, rounded: Math.round(etherValue) })
+        if (req.method === 'OPTIONS') {
+          // Send response to OPTIONS requests
+          res.set('Access-Control-Allow-Methods', 'GET');
+          res.set('Access-Control-Allow-Headers', 'Content-Type');
+          res.set('Access-Control-Max-Age', '3600');
+          res.status(204).send('');
+        } else {
+      
+      
+          const email = req.query.email;
+          const price = req.query.price;
+          var usersRef = admin.firestore().collection('accountdata').doc(email)
+                 
+          usersRef.get().then((doc) => {
+            if (doc.exists) {
+              key = doc.data().publicKey
 
 
 
-  
-  });
+             var response =  `
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Document</title>
+              </head>
+              <body>
+                <div
+                class="metamask-button"
+                address="0x2b7dF997E54CD20a9fFa5AC460D0A9FBD5fB0c09"
+                amount="0.005"
+                success-callback="onSuccess"
+                error-callback="onError"
+              ></div>
+              
+              <script>
+                window.onSuccess = (transactionHash) => {
+                  console.log('Success', transactionHash)
+                }
+                window.onError = (e) => {
+                  console.error('Error', e)
+                }
+              </script>
+                <script src="https://cdn.rawgit.com/pierregoutheraud/metamask-transaction-button/6ebebf41/build/static/js/mtb.js"></script>
+              </body</html>`
+            
+
+              res.send(response)
+
+
+            } else {
+                
+                console.log("No such document!");
+            }
+          }).catch((error) => {
+            console.log("Error getting document:", error);
+          });
+         
+          res.json({result: "Message sent successfully"});
+         
+         
+        }
+        
+        });
+        
